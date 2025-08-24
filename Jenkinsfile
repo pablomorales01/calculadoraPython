@@ -22,7 +22,7 @@ pipeline {
             steps {
                 bat '''
                     python3 -m venv venv
-                    source venv\Scripts\activate
+                    source venv\\Scripts\\activate
                     pip install --upgrade pip
                     pip install coverage
                 '''
@@ -32,7 +32,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 bat '''
-                    source venv\Scripts\activate
+                    source venv\\Scripts\\activate
             
                     # 1. Ejecuta las pruebas con coverage y las guarda en .coverage coverage run -m unittest discover 
 
@@ -49,7 +49,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     bat '''
-                        source venv\Scripts\activate
+                        source venv\\Scripts\\activate
                         sonar-scanner -Dsonar.login=$SONARQUBE_ENV ^
                         -Dsonar.python.coverage.reportPaths=coverage.xml ^  // <--- Ruta del informe de cobertura
                         -Dsonar.python.xunit.reportPaths=test-results.xml // <--- Ruta del informe de pruebas
