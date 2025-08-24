@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        // Usa la herramienta SonarQube Scanner que configuraste en Jenkins
-        // El nombre debe coincidir con el campo 'Name' que pusiste: 'SonarQube'
+        // Usa la herramienta SonarQube Scanner que configuraste en Jenkins.
+        // El nombre debe coincidir con el que pusiste: 'SonarQube'
         sonarScanner 'SonarQube' 
     }
 
@@ -62,19 +62,18 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // Inyecta el token de forma segura
+                // Inyecta el token de forma segura usando el ID 'sonar-token' que ya configuraste
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                     
-                    // El bloque withSonarQubeEnv inyecta el PATH
+                    // El bloque withSonarQubeEnv inyecta el PATH del scanner
                     withSonarQubeEnv('SonarQube') {
                         bat '''
-                            REM Reactivamos venv para que Python/Coverage/XML sigan siendo accesibles,
-                            REM PERO ejecutamos sonar-scanner antes de la activación en la misma línea
-                            sonar-scanner -Dsonar.login=%SONAR_TOKEN% ^
-                                -Dsonar.projectKey=calculadora-python ^
-                                -Dsonar.sources=. ^
-                                -Dsonar.python.coverage.reportPaths=coverage.xml ^
-                                -Dsonar.python.xunit.reportPaths=test-results.xml
+                            REM Reactivamos venv y ejecutamos sonar-scanner
+                            call venv\\Scripts\\activate.bat && sonar-scanner -Dsonar.login=%SONAR_TOKEN% ^
+                              -Dsonar.projectKey=calculadora-python ^
+                              -Dsonar.sources=. ^
+                              -Dsonar.python.coverage.reportPaths=coverage.xml ^
+                              -Dsonar.python.xunit.reportPaths=test-results.xml
                         '''
                     }
                 }
