@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    tools {
+        // Usa la herramienta SonarQube Scanner que configuraste en Jenkins
+        // El nombre debe coincidir con el campo 'Name' que pusiste: 'SonarQube'
+        sonarScanner 'SonarQube' 
+    }
+
     environment {
         // Asegúrate de que esta ruta sea la correcta en tu sistema
         PYTHON_EXE = "C:\\Users\\pama\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" 
@@ -58,7 +64,7 @@ pipeline {
             steps {
                 // Inyecta el token de forma segura usando el ID 'sonar-token' que ya configuraste
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    // El bloque withSonarQubeEnv inyecta el path del scanner
+                    // El bloque withSonarQubeEnv ya no es necesario, pero lo mantenemos para compatibilidad
                     withSonarQubeEnv('SonarQube') {
                         bat '''
                             REM Reactivamos venv y ejecutamos sonar-scanner
