@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        // CORRECCIÓN FINAL: Se usa el nombre de herramienta exacto del plugin de Jenkins.
-        tool 'hudson.plugins.sonar.SonarRunnerInstallation', 'SonarQube' 
-    }
-
     environment {
         // Asegúrate de que esta ruta sea la correcta en tu sistema
         PYTHON_EXE = "C:\\Users\\pama\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" 
@@ -64,11 +59,11 @@ pipeline {
                 // Inyecta el token de forma segura usando el ID 'sonar-token' que ya configuraste
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                     
-                    // withSonarQubeEnv ya no es necesario con el 'tools' block, pero lo mantenemos
-                    // para asegurar que las variables de SonarQube se inyecten.
+                    // El bloque withSonarQubeEnv inyecta el PATH del scanner
+                    // La sintaxis 'call... && sonar-scanner...' es la única que le funcionó anteriormente.
                     withSonarQubeEnv('SonarQube') {
                         bat '''
-                            REM Reactivamos venv y ejecutamos sonar-scanner
+                            REM La clave es que el comando debe ser una sola línea de BAT
                             call venv\\Scripts\\activate.bat && sonar-scanner -Dsonar.login=%SONAR_TOKEN% ^
                               -Dsonar.projectKey=calculadora-python ^
                               -Dsonar.sources=. ^
