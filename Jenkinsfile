@@ -26,7 +26,7 @@ pipeline {
                     
                     pip install --upgrade pip
                     pip install coverage
-                    pip install xmlrunner  REM Se instala el runner de pruebas para generar XML
+                    pip install unittest-xml-reporting  REM Se instala el nuevo runner para generar XML
                 '''
             }
         }
@@ -37,11 +37,11 @@ pipeline {
                     REM REACTIVACIÓN en cada nuevo bloque bat
                     call venv\\Scripts\\activate.bat 
             
-                    REM 1. Ejecuta las pruebas con xmlrunner para generar el reporte
+                    REM 1. Ejecuta las pruebas y genera el XML directamente
                     REM    Los resultados se guardarán en la carpeta 'test-reports'
                     python -m xmlrunner --output-file test-results.xml
 
-                    REM 2. Ejecuta las pruebas nuevamente para la cobertura y genera el XML
+                    REM 2. Ejecuta las pruebas nuevamente para la cobertura
                     coverage run -m unittest discover 
                     coverage xml -o coverage.xml
                 '''
