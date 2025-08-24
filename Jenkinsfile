@@ -1,20 +1,15 @@
 pipeline {
     agent any
 
-    // El bloque 'tools' fue eliminado para resolver el error 'Invalid tool type'
-    // Ya que estas herramientas a menudo se manejan mejor directamente en el PATH.
-
-    environment {
-        // Token de SonarQube configurado como credencial en Jenkins
-        SONARQUBE_ENV = credentials('sonar-token') 
-    }
+    // 1. ELIMINAMOS el bloque 'environment' que causaba el problema de inyección
+    //    ya que 'withSonarQubeEnv' maneja el token automáticamente.
 
     stages {
     
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/pablomorales01/calculadoraPython.git'
+                   url: 'https://github.com/pablomorales01/calculadoraPython.git' // [cite: 3]
             }
         }
 
@@ -39,7 +34,7 @@ pipeline {
                     coverage run -m unittest discover 
 
                     # 2. Genera el informe de resultados de las pruebas (JUnit XML)
-                    python -m junitxml --output test-results.xml
+                    python -m junitxml --output test-results.xml // [cite: 7]
             
                     # 3. Genera el informe de cobertura (Cobertura XML)
                     coverage xml -o coverage.xml
@@ -49,12 +44,16 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
+                // 2. 'withSonarQubeEnv' (con el nombre de tu servidor: 'SonarQube') 
+                //    inyecta el token automáticamente como $SONAR_AUTH_TOKEN.
+                withSonarQubeEnv('SonarQube') { // 
                     bat '''
                         venv/Scripts/activate
-                        sonar-scanner -Dsonar.login=$SONARQUBE_ENV ^
-                        -Dsonar.python.coverage.reportPaths=coverage.xml ^  // Ruta del informe de cobertura
-                        -Dsonar.python.xunit.reportPaths=test-results.xml // Ruta del informe de pruebas
+              
+                        // 3. USAMOS $SONAR_AUTH_TOKEN (creada por 'withSonarQubeEnv')
+                        sonar-scanner -Dsonar.login=%SONAR_AUTH_TOKEN% ^
+                          -Dsonar.python.coverage.reportPaths=coverage.xml ^
+                          -Dsonar.python.xunit.reportPaths=test-results.xml
                   '''
                 }
             }
@@ -63,8 +62,7 @@ pipeline {
         stage('Quality Gate') { 
             steps {
                 // Espera el resultado del análisis de SonarQube
-                // (Requiere que SonarQube esté configurado con el Webhook)
-                waitForQualityGate abortPipeline: true 
+                waitForQualityGate abortPipeline: true // [cite: 11]
             }
         } 
 
