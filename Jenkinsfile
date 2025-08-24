@@ -4,7 +4,7 @@ pipeline {
     // Define la ruta de Python como una variable de entorno para usarla en todos los bloques 'bat'
     environment {
         // **IMPORTANTE:** Cambia esta ruta por la ruta real donde está instalado python.exe en tu servidor Jenkins.
-        PYTHON_EXE = "C:\\Python\\Python310\\python.exe" // Ejemplo
+        PYTHON_EXE = "C:\\Users\\pama\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" // Ejemplo
     }
 
     stages {
