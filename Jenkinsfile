@@ -57,12 +57,13 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // Inyecta el token de forma segura usando el ID 'sonar-token' que ya configuraste
+                // 1. Inyecta el token de forma segura (con el ID 'sonar-token' que ya configuraste)
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    // El bloque withSonarQubeEnv inyecta el path del scanner
+                    
+                    // 2. El bloque withSonarQubeEnv inyecta el path del scanner
                     withSonarQubeEnv('SonarQube') {
                         bat '''
-                            REM Reactivamos venv (Sintaxis Windows) y ejecutamos sonar-scanner
+                            REM Reactivamos venv y ejecutamos sonar-scanner
                             call venv\\Scripts\\activate.bat && sonar-scanner -Dsonar.login=%SONAR_TOKEN% ^
                               -Dsonar.projectKey=calculadora-python ^
                               -Dsonar.sources=. ^
