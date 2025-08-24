@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         // **IMPORTANTE:** Asegúrate de que esta ruta sea la correcta en tu sistema
-        // (Revisar si tu python.exe está realmente en el PATH o necesitas la ruta completa)
         PYTHON_EXE = "C:\\Users\\pama\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" 
     }
 
@@ -22,7 +21,7 @@ pipeline {
                     REM Crea el entorno virtual
                     %PYTHON_EXE% -m venv venv
                
-                    REM Activación del entorno virtual (Sintaxis de Windows)
+                    REM Activación del entorno virtual
                     call venv\\Scripts\\activate.bat
                     
                     REM Instalamos las dependencias necesarias
@@ -57,10 +56,9 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // 1. Inyecta el token de forma segura (con el ID 'sonar-token' que ya configuraste)
+                // Inyecta el token de forma segura usando el ID 'sonar-token' que ya configuraste
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    
-                    // 2. El bloque withSonarQubeEnv inyecta el path del scanner
+                    // El bloque withSonarQubeEnv inyecta el path del scanner
                     withSonarQubeEnv('SonarQube') {
                         bat '''
                             REM Reactivamos venv y ejecutamos sonar-scanner
@@ -77,6 +75,7 @@ pipeline {
 
         stage('Quality Gate') { 
             steps {
+                // Espera el resultado del análisis de SonarQube
                 waitForQualityGate abortPipeline: true 
             }
         } 
