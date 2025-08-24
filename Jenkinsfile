@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     tools {
-        // Usa la herramienta SonarQube Scanner que configuraste en Jenkins.
-        // El nombre debe coincidir con el que pusiste: 'SonarQube'
-        sonarScanner 'SonarQube' 
+        // CORRECCIÓN: El nombre del tipo de herramienta es 'sonarRunner' en Jenkins, no 'sonarScanner'.
+        // El nombre 'SonarQube' es el que configuraste en "Global Tool Configuration".
+        sonarRunner 'SonarQube' 
     }
 
     environment {
@@ -65,7 +65,8 @@ pipeline {
                 // Inyecta el token de forma segura usando el ID 'sonar-token' que ya configuraste
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                     
-                    // El bloque withSonarQubeEnv inyecta el PATH del scanner
+                    // withSonarQubeEnv ya no es necesario con el 'tools' block, pero lo mantenemos
+                    // para asegurar que las variables de SonarQube se inyecten.
                     withSonarQubeEnv('SonarQube') {
                         bat '''
                             REM Reactivamos venv y ejecutamos sonar-scanner
