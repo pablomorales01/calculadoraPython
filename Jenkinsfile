@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    // Define la ruta de Python como una variable de entorno para usarla en todos los bloques 'bat'
+    environment {
+        // **IMPORTANTE:** Cambia esta ruta por la ruta real donde está instalado python.exe en tu servidor Jenkins.
+        PYTHON_EXE = "C:\\Python\\Python310\\python.exe" // Ejemplo
+    }
+
     stages {
     
         stage('Checkout') {
@@ -13,12 +19,10 @@ pipeline {
         stage('Setup Python') {
             steps {
                 bat '''
-                    // 1. Usa 'python' en lugar de 'python3' si ese es el nombre del ejecutable en Windows.
-                    //    Si 'python' tampoco funciona, usa la ruta completa (ej: C:\\Python\\Python310\\python.exe).
-                    python -m venv venv
+                    REM Crea el entorno virtual usando la ruta completa
+                    %PYTHON_EXE% -m venv venv
                
-                    // 2. ACTIVACIÓN: Usa la sintaxis correcta de Windows para activar un script de Batch.
-                    //    El comando debe ser 'call' para que el proceso no termine inmediatamente.
+                    REM 2. ACTIVACIÓN: Es crucial usar 'call' y la sintaxis de Windows.
                     call venv\\Scripts\\activate.bat
                     
                     pip install --upgrade pip
@@ -30,16 +34,16 @@ pipeline {
         stage('Run Tests') {
             steps {
                 bat '''
-                    // 3. REACTIVACIÓN: El entorno se debe reactivar en cada bloque 'bat' o 'sh'.
+                    REM REACTIVACIÓN: El entorno se debe reactivar en cada bloque 'bat'
                     call venv\\Scripts\\activate.bat 
             
-                    # 1. Ejecuta las pruebas con coverage
+                    REM 1. Ejecuta las pruebas con coverage
                     coverage run -m unittest discover 
 
-                    # 2. Genera el informe de resultados (JUnit XML)
-                    python -m junitxml --output test-results.xml
+                    REM 2. Genera el informe de resultados (JUnit XML)
+                    %PYTHON_EXE% -m junitxml --output test-results.xml
             
-                    # 3. Genera el informe de cobertura (Cobertura XML)
+                    REM 3. Genera el informe de cobertura (Cobertura XML)
                     coverage xml -o coverage.xml
                 '''
             }
@@ -49,10 +53,10 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     bat '''
-                        // 3. REACTIVACIÓN
+                        REM REACTIVACIÓN
                         call venv\\Scripts\\activate.bat
               
-                        // 4. Se usa %VARIABLE% en Batch.
+                        REM Usa %SONAR_AUTH_TOKEN% para el login
                         sonar-scanner -Dsonar.login=%SONAR_AUTH_TOKEN% ^
                           -Dsonar.python.coverage.reportPaths=coverage.xml ^
                           -Dsonar.python.xunit.reportPaths=test-results.xml
@@ -66,6 +70,5 @@ pipeline {
                 waitForQualityGate abortPipeline: true 
             }
         } 
-
     }
 }
