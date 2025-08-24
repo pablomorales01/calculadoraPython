@@ -60,11 +60,10 @@ pipeline {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                     
                     // El bloque withSonarQubeEnv inyecta el PATH del scanner
-                    // La sintaxis 'call... && sonar-scanner...' es la única que le funcionó anteriormente.
+                    // Hemos ELIMINADO la activación del venv de esta etapa
                     withSonarQubeEnv('SonarQube') {
                         bat '''
-                            REM La clave es que el comando debe ser una sola línea de BAT
-                            call venv\\Scripts\\activate.bat && sonar-scanner -Dsonar.login=%SONAR_TOKEN% ^
+                            sonar-scanner -Dsonar.login=%SONAR_TOKEN% ^
                               -Dsonar.projectKey=calculadora-python ^
                               -Dsonar.sources=. ^
                               -Dsonar.python.coverage.reportPaths=coverage.xml ^
