@@ -62,17 +62,19 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // Inyecta el token de forma segura usando el ID 'sonar-token' que ya configuraste
+                // Inyecta el token de forma segura
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    // El bloque withSonarQubeEnv ya no es necesario, pero lo mantenemos para compatibilidad
+                    
+                    // El bloque withSonarQubeEnv inyecta el PATH
                     withSonarQubeEnv('SonarQube') {
                         bat '''
-                            REM Reactivamos venv y ejecutamos sonar-scanner
-                            call venv\\Scripts\\activate.bat && sonar-scanner -Dsonar.login=%SONAR_TOKEN% ^
-                              -Dsonar.projectKey=calculadora-python ^
-                              -Dsonar.sources=. ^
-                              -Dsonar.python.coverage.reportPaths=coverage.xml ^
-                              -Dsonar.python.xunit.reportPaths=test-results.xml
+                            REM Reactivamos venv para que Python/Coverage/XML sigan siendo accesibles,
+                            REM PERO ejecutamos sonar-scanner antes de la activación en la misma línea
+                            sonar-scanner -Dsonar.login=%SONAR_TOKEN% ^
+                                -Dsonar.projectKey=calculadora-python ^
+                                -Dsonar.sources=. ^
+                                -Dsonar.python.coverage.reportPaths=coverage.xml ^
+                                -Dsonar.python.xunit.reportPaths=test-results.xml
                         '''
                     }
                 }
