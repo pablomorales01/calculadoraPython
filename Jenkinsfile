@@ -24,7 +24,9 @@ pipeline {
                     REM Activación del entorno virtual
                     call venv\\Scripts\\activate.bat
                     
-                    pip install --upgrade pip && pip install coverage && pip install unittest-xml-reporting
+                    REM Corregimos la instalación de pip
+                    %PYTHON_EXE% -m pip install --upgrade pip
+                    pip install coverage unittest-xml-reporting
                 '''
             }
         }
