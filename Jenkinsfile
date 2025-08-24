@@ -4,10 +4,6 @@ pipeline {
     environment {
         // **IMPORTANTE:** Asegúrate de que esta ruta sea la correcta en tu sistema
         PYTHON_EXE = "C:\\Users\\pama\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" 
-        
-        // Token de SonarQube configurado como credencial en Jenkins
-        // Asegúrate de que existe una credencial llamada 'sonar-token' en Jenkins
-        SONARQUBE_ENV = credentials('sonar-token') 
     }
 
     stages {
@@ -60,17 +56,19 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // El bloque withSonarQubeEnv inyecta el path del scanner
-                withSonarQubeEnv('SonarQube') {
-                    bat '''
-                        REM 1. Reactivamos el entorno virtual (necesario para usar pip/python)
-                        REM 2. Encadenamos con sonar-scanner (que ya está en el PATH gracias a withSonarQubeEnv)
-                        call venv\\Scripts\\activate.bat && sonar-scanner -Dsonar.login=%SONARQUBE_ENV% ^
-                          -Dsonar.projectKey=calculadora-python ^
-                          -Dsonar.sources=. ^
-                          -Dsonar.python.coverage.reportPaths=coverage.xml ^
-                          -Dsonar.python.xunit.reportPaths=test-results.xml
-                  '''
+                // Inyecta el token de forma segura
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    // El bloque withSonarQubeEnv inyecta el path del scanner
+                    withSonarQubeEnv('SonarQube') {
+                        bat '''
+                            REM Reactivamos venv y ejecutamos sonar-scanner
+                            call venv\\Scripts\\activate.bat && sonar-scanner -Dsonar.login=%SONAR_TOKEN% ^
+                              -Dsonar.projectKey=calculadora-python ^
+                              -Dsonar.sources=. ^
+                              -Dsonar.python.coverage.reportPaths=coverage.xml ^
+                              -Dsonar.python.xunit.reportPaths=test-results.xml
+                        '''
+                    }
                 }
             }
         }
