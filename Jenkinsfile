@@ -58,4 +58,14 @@ pipeline {
             }
         }
 
-        stage('Qua
+        stage('Quality Gate') { // <-- Se completa el nombre y se abre el bloque
+            steps {
+                // Espera el resultado del análisis de SonarQube
+                // (Requiere que SonarQube esté configurado con el Webhook)
+                waitForQualityGate abortPipeline: true 
+            }
+        } // <-- Cierre del stage 'Quality Gate'
+
+    } // <-- Cierre del bloque 'stages' (si no estaba en la línea 62)
+
+} // <-- Cierre del bloque 'pipeline' 
