@@ -24,9 +24,7 @@ pipeline {
                     REM Activación del entorno virtual
                     call venv\\Scripts\\activate.bat
                     
-                    pip install --upgrade pip
-                    pip install coverage
-                    pip install unittest-xml-reporting  REM Se instala el nuevo runner para generar XML
+                    pip install --upgrade pip && pip install coverage && pip install unittest-xml-reporting
                 '''
             }
         }
