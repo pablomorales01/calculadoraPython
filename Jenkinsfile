@@ -45,7 +45,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    withSonarQubeEnv('sonar') {
+                    withSonarQubeEnv('SonarQube') {
                         bat '''
                             call venv\\Scripts\\activate.bat
                             sonar-scanner ^
