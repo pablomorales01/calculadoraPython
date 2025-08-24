@@ -1,16 +1,16 @@
 pipeline {
     agent any
 
-    tools {
-        python 'Python3'                 // Python configurado en Jenkins (Global Tool Configuration)
-        sonarQubeScanner 'SonarScanner'  // SonarScanner configurado en Jenkins
-    }
+    // El bloque 'tools' fue eliminado para resolver el error 'Invalid tool type'
+    // Ya que estas herramientas a menudo se manejan mejor directamente en el PATH.
 
     environment {
-        SONARQUBE_ENV = credentials('sonar-token') // Token de SonarQube configurado como credencial en Jenkins
+        // Token de SonarQube configurado como credencial en Jenkins
+        SONARQUBE_ENV = credentials('sonar-token') 
     }
 
     stages {
+    
         stage('Checkout') {
             steps {
                 git branch: 'main',
@@ -22,7 +22,8 @@ pipeline {
             steps {
                 bat '''
                     python3 -m venv venv
-                    source venv\\Scripts\\activate
+                    REM Usamos barras inclinadas '/' para la ruta para evitar errores de Groovy
+                    venv/Scripts/activate
                     pip install --upgrade pip
                     pip install coverage
                 '''
@@ -32,9 +33,10 @@ pipeline {
         stage('Run Tests') {
             steps {
                 bat '''
-                    source venv\\Scripts\\activate
+                    venv/Scripts/activate
             
-                    # 1. Ejecuta las pruebas con coverage y las guarda en .coverage coverage run -m unittest discover 
+                    # 1. Ejecuta las pruebas con coverage y las guarda en .coverage 
+                    coverage run -m unittest discover 
 
                     # 2. Genera el informe de resultados de las pruebas (JUnit XML)
                     python -m junitxml --output test-results.xml
@@ -49,23 +51,23 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     bat '''
-                        source venv\\Scripts\\activate
+                        venv/Scripts/activate
                         sonar-scanner -Dsonar.login=$SONARQUBE_ENV ^
-                        -Dsonar.python.coverage.reportPaths=coverage.xml ^  // <--- Ruta del informe de cobertura
-                        -Dsonar.python.xunit.reportPaths=test-results.xml // <--- Ruta del informe de pruebas
-                    '''
+                        -Dsonar.python.coverage.reportPaths=coverage.xml ^  // Ruta del informe de cobertura
+                        -Dsonar.python.xunit.reportPaths=test-results.xml // Ruta del informe de pruebas
+                  '''
                 }
             }
         }
 
-        stage('Quality Gate') { // <-- Se completa el nombre y se abre el bloque
+        stage('Quality Gate') { 
             steps {
                 // Espera el resultado del análisis de SonarQube
                 // (Requiere que SonarQube esté configurado con el Webhook)
                 waitForQualityGate abortPipeline: true 
             }
-        } // <-- Cierre del stage 'Quality Gate'
+        } 
 
-    } // <-- Cierre del bloque 'stages' (si no estaba en la línea 62)
+    } // Cierre del bloque 'stages'
 
-} // <-- Cierre del bloque 'pipeline' 
+} // Cierre del bloque 'pipeline'
