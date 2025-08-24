@@ -37,16 +37,15 @@ pipeline {
                     REM REACTIVACIÓN: El entorno se debe reactivar en cada nuevo bloque 'bat'
                     call venv\\Scripts\\activate.bat 
             
-                    REM 1. Ejecuta las pruebas y guarda el archivo .coverage
+                    REM Ejecuta las pruebas y guarda el archivo .coverage
                     coverage run -m unittest discover 
 
-                    REM 2. Genera el informe de cobertura (Cobertura XML)
+                    REM Genera el informe de cobertura (Cobertura XML)
                     coverage xml -o coverage.xml
                     
-                    REM 3. Genera el informe de resultados de las pruebas (JUnit XML)
-                    // **Nota:** Este comando requiere que tu test runner (unittest)
-                    // genere un reporte en un formato que 'junit-xml' pueda procesar.
-                    // Si no, necesitarás ajustar el comando.
+                    REM Genera el informe de resultados de las pruebas (JUnit XML)
+                    REM `junit-xml` no tiene un comando de línea de comandos estándar. 
+                    REM `coverage xml` ya genera un reporte de cobertura, y el paso `junit` de Jenkins lee el XML de pruebas
                 '''
             }
         }
@@ -60,7 +59,6 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // El nombre 'SonarQube' DEBE coincidir con el configurado en Jenkins
                 withSonarQubeEnv('SonarQube') { 
                     bat '''
                         REM REACTIVACIÓN para asegurar que sonar-scanner esté en el PATH
