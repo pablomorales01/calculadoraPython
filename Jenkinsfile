@@ -63,7 +63,7 @@ pipeline {
                     // Hemos ELIMINADO la activación del venv de esta etapa
                     withSonarQubeEnv('SonarQube') {
                         bat '''
-                            sonar-scanner -Dsonar.login=%SONAR_TOKEN% ^
+                            C:\\Users\\pama\\Desktop\\Pama\\sonar\\sonar-scanner\\bin\\sonar-scanner.bat -Dsonar.login=%SONAR_TOKEN% ^
                               -Dsonar.projectKey=calculadora-python ^
                               -Dsonar.sources=. ^
                               -Dsonar.python.coverage.reportPaths=coverage.xml ^
