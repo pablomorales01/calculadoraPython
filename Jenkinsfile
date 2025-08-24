@@ -2,8 +2,12 @@ pipeline {
     agent any
 
     environment {
-        // Asegúrate de que esta ruta sea la correcta en tu sistema
+        // **IMPORTANTE:** Asegúrate de que esta ruta sea la correcta en tu sistema
         PYTHON_EXE = "C:\\Users\\pama\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" 
+        
+        // Token de SonarQube configurado como credencial en Jenkins
+        // Asegúrate de que existe una credencial llamada 'sonar-token' en Jenkins
+        SONARQUBE_ENV = credentials('sonar-token') 
     }
 
     stages {
@@ -24,7 +28,7 @@ pipeline {
                     REM Activación del entorno virtual
                     call venv\\Scripts\\activate.bat
                     
-                    REM Corregimos la instalación de pip
+                    REM Instalamos las dependencias necesarias
                     %PYTHON_EXE% -m pip install --upgrade pip
                     pip install coverage unittest-xml-reporting
                 '''
@@ -38,10 +42,9 @@ pipeline {
                     call venv\\Scripts\\activate.bat 
             
                     REM 1. Ejecuta las pruebas y genera el XML directamente
-                    REM    Los resultados se guardarán en la carpeta 'test-reports'
                     python -m xmlrunner --output-file test-results.xml
 
-                    REM 2. Ejecuta las pruebas nuevamente para la cobertura
+                    REM 2. Ejecuta las pruebas nuevamente para la cobertura y genera el XML
                     coverage run -m unittest discover 
                     coverage xml -o coverage.xml
                 '''
@@ -50,20 +53,19 @@ pipeline {
         
         stage('Publish Test Results') {
             steps {
-                // Ahora el paso 'junit' encontrará el archivo 'test-results.xml'
+                // Publica los resultados de las pruebas
                 junit 'test-results.xml' 
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') { 
+                // El bloque withSonarQubeEnv inyecta el path del scanner
+                withSonarQubeEnv('SonarQube') {
                     bat '''
-                        REM REACTIVACIÓN
-                        call venv\\Scripts\\activate.bat
-              
-                        REM Usa el token de SonarQube
-                        sonar-scanner -Dsonar.login=%SONAR_AUTH_TOKEN% ^
+                        REM 1. Reactivamos el entorno virtual (necesario para usar pip/python)
+                        REM 2. Encadenamos con sonar-scanner (que ya está en el PATH gracias a withSonarQubeEnv)
+                        call venv\\Scripts\\activate.bat && sonar-scanner -Dsonar.login=%SONARQUBE_ENV% ^
                           -Dsonar.projectKey=calculadora-python ^
                           -Dsonar.sources=. ^
                           -Dsonar.python.coverage.reportPaths=coverage.xml ^
@@ -75,6 +77,7 @@ pipeline {
 
         stage('Quality Gate') { 
             steps {
+                // Espera el resultado del análisis de SonarQube
                 waitForQualityGate abortPipeline: true 
             }
         } 
