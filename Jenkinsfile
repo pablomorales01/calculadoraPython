@@ -2,9 +2,8 @@ pipeline {
     agent any
 
     tools {
-        // CORRECCIÓN: El nombre del tipo de herramienta es 'sonarRunner' en Jenkins, no 'sonarScanner'.
-        // El nombre 'SonarQube' es el que configuraste en "Global Tool Configuration".
-        sonarRunner 'SonarQube' 
+        // CORRECCIÓN FINAL: Se usa el nombre de herramienta exacto del plugin de Jenkins.
+        tool 'hudson.plugins.sonar.SonarRunnerInstallation', 'SonarQube' 
     }
 
     environment {
