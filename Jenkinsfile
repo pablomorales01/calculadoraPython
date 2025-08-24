@@ -22,7 +22,7 @@ pipeline {
             steps {
                 bat '''
                     python3 -m venv venv
-                    source venv/bin/activate
+                    source venv\Scripts\activate
                     pip install --upgrade pip
                 '''
             }
@@ -31,7 +31,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 bat '''
-                    source venv/bin/activate
+                    source venv\Scripts\activate
                     # Ejecuta tests si existen, no falla si no hay
                     python -m unittest discover || echo "No tests encontrados"
                 '''
@@ -42,7 +42,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     bat '''
-                        source venv/bin/activate
+                        source venv\Scripts\activate
                         sonar-scanner -Dsonar.login=$SONARQUBE_ENV
                     '''
                 }
