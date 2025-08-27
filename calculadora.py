@@ -1,6 +1,6 @@
 # calculadora.py
 
-# Funciones de la calculadora (Asegúrate de que estas funciones existen)
+# Funciones de la calculadora
 def suma(a, b):
     return a + b
 
@@ -11,39 +11,50 @@ def multiplicacion(a, b):
     return a * b
 
 def division(a, b):
-    # Manejo básico de división por cero
     if b == 0:
         return "Error: División por cero"
     return a / b
 
-# Función para manejar la interacción con el usuario (la parte que tiene 'input')
-def main():
-    print("Calculadora básica")
-    print("Operaciones: suma, resta, multiplicacion, division")
-    
-    # Esta es la línea que causaba el error EOFError en CI/CD
-    op = input("Elige la operación: ")
-    
+# Interfaz gráfica con Tkinter
+import tkinter as tk
+
+def calcular():
     try:
-        num1 = float(input("Introduce el primer número: "))
-        num2 = float(input("Introduce el segundo número: "))
+        a = float(entry1.get())
+        b = float(entry2.get())
+        op = operacion.get()
+        if op == "suma":
+            resultado.set(suma(a, b))
+        elif op == "resta":
+            resultado.set(resta(a, b))
+        elif op == "multiplicacion":
+            resultado.set(multiplicacion(a, b))
+        elif op == "division":
+            resultado.set(division(a, b))
+        else:
+            resultado.set("Operación no válida")
     except ValueError:
-        print("Entrada inválida. Asegúrate de introducir números.")
-        return
+        resultado.set("Entrada inválida")
 
-    if op == 'suma':
-        print(f"Resultado: {suma(num1, num2)}")
-    elif op == 'resta':
-        print(f"Resultado: {resta(num1, num2)}")
-    elif op == 'multiplicacion':
-        print(f"Resultado: {multiplicacion(num1, num2)}")
-    elif op == 'division':
-        print(f"Resultado: {division(num1, num2)}")
-    else:
-        print("Operación no válida.")
-
-# **LÍNEA CRÍTICA CORREGIDA**
-# Esto asegura que 'main()' solo se ejecuta si el script se corre directamente, 
-# y no cuando se importa por los tests.
 if __name__ == "__main__":
-    main()
+    root = tk.Tk()
+    root.title("Calculadora")
+
+    tk.Label(root, text="Primer número:").pack()
+    entry1 = tk.Entry(root)
+    entry1.pack()
+
+    tk.Label(root, text="Segundo número:").pack()
+    entry2 = tk.Entry(root)
+    entry2.pack()
+
+    operacion = tk.StringVar(root)
+    operacion.set("suma")
+    opciones = tk.OptionMenu(root, operacion, "suma", "resta", "multiplicacion", "division")
+    opciones.pack()
+
+    tk.Button(root, text="Calcular", command=calcular).pack()
+    resultado = tk.StringVar()
+    tk.Label(root, textvariable=resultado).pack()
+
+    root.mainloop()
